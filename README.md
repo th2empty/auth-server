@@ -1,17 +1,13 @@
 # Authentication Server
 
-___
-
 ### This is a simple authentication server written in Golang.
 
-___
 
 ## Dependencies
 
 1. Golang v1.17
 2. PostgreSQL
 
-___
 
 ## Installation
 
@@ -71,7 +67,7 @@ You can also design your own database, but for this you will have to make change
 
 ## Author
 
-###[th2empty](https://github.com/th2empty)
+[th2empty](https://github.com/th2empty)
 
 ## License
 This project is licensed under the MIT license. See the LICENSE file for more info.
