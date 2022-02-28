@@ -18,7 +18,7 @@ var (
 	issuer   = viper.GetString("auth.issuer")
 	audience = viper.GetString("auth.audience")
 	//salt            = viper.GetString("auth.salt")
-	accessTokenTTL  = viper.GetDuration("auth.access_token_ttl") * time.Minute // The token will become invalid after 31 days
+	accessTokenTTL  = viper.GetDuration("auth.access_token_ttl") * time.Minute
 	refreshTokenTTL = viper.GetDuration("auth.refresh_token_ttl") * time.Hour
 	signingKey      = viper.GetString("auth.signing_key")
 )
