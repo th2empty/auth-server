@@ -13,6 +13,16 @@ const (
 	userCtx             = "userId"
 )
 
+// @Summary Identity
+// @Security ApiKeyAuth
+// @Tags auth
+// @Description authentication
+// @ID authentication
+// @Accept json
+// @Produce json
+// @Success 200
+// @Failure 401 {object} errorResponse
+// @Router /auth/identity [post]
 func (h *Handler) userIdentity(ctx *gin.Context) {
 	header := ctx.GetHeader(authorizationHeader)
 	if header == "" {
@@ -42,10 +52,6 @@ func (h *Handler) userIdentity(ctx *gin.Context) {
 		newErrorResponse(ctx, http.StatusUnauthorized, err.Error())
 		return
 	}
-
-	ctx.JSON(http.StatusOK, map[string]string{
-		"message": "access granted",
-	})
 }
 
 func getUserId(ctx *gin.Context) (int, error) {

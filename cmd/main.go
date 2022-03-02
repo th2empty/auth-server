@@ -6,7 +6,7 @@ import (
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"github.com/th2empty/auth_service"
+	authServer "github.com/th2empty/auth_service"
 	"github.com/th2empty/auth_service/configs"
 	"github.com/th2empty/auth_service/pkg/handler"
 	"github.com/th2empty/auth_service/pkg/repository"
@@ -18,6 +18,22 @@ import (
 	"time"
 )
 
+// @title           Auth Server API
+// @version         1.0.0
+// @description     Server for authentication
+
+// @license.name  MIT License
+
+// @host      localhost:9000
+// @BasePath  /
+
+// @securityDefinitions.apiKey  AuthApiKey
+// @in header
+// @name Authorization
+
+// @securityDefinitions.apiKey  RefreshApiKey
+// @in header
+// @name Authorization
 func main() {
 	if err := configs.InitConfig(); err != nil {
 		log.WithFields(log.Fields{
@@ -82,7 +98,7 @@ func main() {
 		log.SetFormatter(new(log.JSONFormatter))
 	}
 
-	srv := new(auth_server.Server)
+	srv := new(authServer.Server)
 	if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
 		log.WithFields(log.Fields{
 			"package":  "main",

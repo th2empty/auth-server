@@ -2,7 +2,11 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/swaggo/files"
+	"github.com/swaggo/gin-swagger"
 	"github.com/th2empty/auth_service/pkg/service"
+
+	_ "github.com/th2empty/auth_service/docs"
 )
 
 type Handler struct {
@@ -29,6 +33,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		account.GET("/sessions", h.GetSessionsDetails)
 		account.POST("/logout", h.Logout)
 	}
+
+	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	return router
 }

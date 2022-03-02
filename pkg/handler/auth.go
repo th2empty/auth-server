@@ -12,6 +12,23 @@ import (
 	"time"
 )
 
+type signUpInput struct {
+	Email    string `json:"email"`
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+// @Summary SignUp
+// @Tags auth
+// @Description Create account
+// @ID create-account
+// @Accept json
+// @Produce json
+// @Param input body signUpInput true "account info"
+// @Success 200 {integer} integer 1
+// @Failure 400 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Router /auth/sign-up [post]
 func (h *Handler) SignUp(ctx *gin.Context) {
 	var input models.User
 
@@ -36,6 +53,19 @@ type signInInput struct {
 	Password string `json:"password" binding:"required"`
 }
 
+// @Summary SignIn
+// @Tags auth
+// @Description login
+// @ID login
+// @Accept json
+// @Produce json
+// @Param app_id header integer true "application id"
+// @Param os_name header string true "Operating system name"
+// @Param input body signInInput true "account info"
+// @Success 200 {integer} integer 1
+// @Failure 400 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Router /auth/sign-in [post]
 func (h *Handler) SignIn(ctx *gin.Context) {
 	var input signInInput
 
@@ -108,6 +138,17 @@ func (h *Handler) SignIn(ctx *gin.Context) {
 	})
 }
 
+// @Summary GetSessionsList
+// @Security ApiKeyAuth
+// @Tags account
+// @Description sessions list
+// @ID sessions
+// @Accept json
+// @Produce json
+// @Success 200 {object} []models.SessionItem
+// @Failure 401 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Router /account/sessions [get]
 func (h *Handler) GetSessionsDetails(ctx *gin.Context) {
 	header := ctx.GetHeader(authorizationHeader)
 	if header == "" {
@@ -143,6 +184,17 @@ func (h *Handler) GetSessionsDetails(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, sessions)
 }
 
+// @Summary Logout
+// @Security ApiKeyAuth
+// @Tags auth
+// @Description logout
+// @ID logout
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string]string
+// @Failure 401 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Router /auth/logout [post]
 func (h *Handler) Logout(ctx *gin.Context) {
 	header := ctx.GetHeader(authorizationHeader)
 	if header == "" {
@@ -179,6 +231,22 @@ func (h *Handler) Logout(ctx *gin.Context) {
 	})
 }
 
+type RefreshResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+}
+
+// @Summary Refresh token
+// @Security RefreshApiKey
+// @Tags auth
+// @Description Refresh access token. The refresh-token must be passed in the header
+// @ID refresh-token
+// @Accept json
+// @Produce json
+// @Success 200 {object} RefreshResponse
+// @Failure 401 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Router /auth/refresh-token [post]
 func (h *Handler) RefreshToken(ctx *gin.Context) {
 	header := ctx.GetHeader(authorizationHeader)
 	if header == "" {
