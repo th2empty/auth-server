@@ -2,8 +2,10 @@
 
 ### This is a simple authentication server written in Golang.
 
+![example workflow](https://github.com/th2empty/auth-server/actions/workflows/build.yml/badge.svg)
 
-## Dependencies
+
+## Required Software
 
 1. Golang v1.17
 2. PostgreSQL
