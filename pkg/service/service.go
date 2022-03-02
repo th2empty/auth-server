@@ -14,8 +14,9 @@ type Authorization interface {
 	GetUserById(id uint) (models.User, error)
 	GetSessions(ownerId uint) ([]models.Session, error)
 	GetSessionById(id uint) (models.Session, error)
-	AddSession(session models.Session) (uint, error)
+	AddSession(session models.Session, historyItem models.SessionHistoryItem) (uint, error)
 	UpdateSession(session models.Session) error
+	GetSessionsDetails(userId uint) ([]models.SessionItem, error)
 	Logout(sessionId uint) error
 }
 

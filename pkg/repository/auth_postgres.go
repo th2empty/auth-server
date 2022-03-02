@@ -80,7 +80,7 @@ func (r *AuthPostgres) GetUserById(id uint) (models.User, error) {
 	return user, err
 }
 
-func (r *AuthPostgres) AddSession(session models.Session) (uint, error) {
+func (r *AuthPostgres) AddSession(session models.Session, historyItem models.SessionHistoryItem) (uint, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
@@ -95,8 +95,8 @@ func (r *AuthPostgres) AddSession(session models.Session) (uint, error) {
 	var id uint
 	createSessionQuery := fmt.Sprintf(`INSERT INTO %s (user_id, refresh_token, refresh_uuid, issused_at) 
 								values($1, $2, $3, $4) RETURNING id`, sessionsTable)
-	/*addSessionToHistoryQuery := fmt.Sprintf(`INSERT INTO %s (user_id, data_encryption_enabled, cloud_notifications_enabled)
-	VALUES($1, $2, $3) RETURNING user_id`, sessionsHistoryTable)*/
+	addSessionToHistoryQuery := fmt.Sprintf(`INSERT INTO %s (app_id, ip_address, city, os, time)
+													VALUES($1, $2, $3, $4, $5) RETURNING id`, sessionsHistoryTable)
 
 	row := tx.QueryRow(createSessionQuery,
 		session.UserId, session.RefreshToken, session.RefreshUUID, session.IssusedAt)
@@ -112,7 +112,8 @@ func (r *AuthPostgres) AddSession(session models.Session) (uint, error) {
 		return 0, err
 	}
 
-	/*_, err = tx.Exec(addSessionToHistoryQuery, id, true, true)
+	_, err = tx.Exec(addSessionToHistoryQuery,
+		historyItem.AppId, historyItem.IpAddress, historyItem.City, historyItem.OS, historyItem.Time)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"package":  "repository",
@@ -123,7 +124,7 @@ func (r *AuthPostgres) AddSession(session models.Session) (uint, error) {
 
 		tx.Rollback()
 		return 0, err
-	}*/
+	}
 
 	return id, tx.Commit()
 }
@@ -168,6 +169,26 @@ func (r *AuthPostgres) GetSessions(ownerId uint) ([]models.Session, error) {
 	err := r.db.Select(&sessions, query, ownerId)
 
 	return sessions, err
+}
+
+func (r *AuthPostgres) GetSessionsDetails(userId uint) ([]models.SessionItem, error) {
+	var sessions []models.SessionItem
+	getSessionQuery := fmt.Sprintf(`SELECT s.id, s.user_id, sh.ip_address, sh.city, sh.os, sh.time, a.name, at.type FROM %s s 
+												INNER JOIN %s sh ON s.id = sh.id INNER JOIN %s a ON sh.app_id = a.id
+													INNER JOIN %s at ON a.type_id = at.id
+													WHERE s.user_id=$1`,
+		sessionsTable, sessionsHistoryTable, applicationsTable, applicationTypesTable)
+	if err := r.db.Select(&sessions, getSessionQuery, userId); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"package":  "repository",
+			"file":     "auth_postgres.go",
+			"function": "GetSessionsDetails",
+			"message":  err,
+		}).Errorf("failed to execute query")
+		return nil, err
+	}
+
+	return sessions, nil
 }
 
 func (r *AuthPostgres) GetSessionById(id uint) (models.Session, error) {

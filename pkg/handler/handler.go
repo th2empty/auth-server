@@ -26,6 +26,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 	account := router.Group("/account", h.userIdentity)
 	{
+		account.GET("/sessions", h.GetSessionsDetails)
 		account.POST("/logout", h.Logout)
 	}
 

@@ -7,6 +7,7 @@ import (
 	"github.com/th2empty/auth_service/pkg/models"
 	"github.com/th2empty/auth_service/pkg/utils"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -63,7 +64,7 @@ func (h *Handler) SignIn(ctx *gin.Context) {
 	if len(sessions) != 0 {
 		newSession.SessionId = sessions[len(sessions)-1].SessionId + 1
 	} else {
-		newSession.SessionId = 0
+		newSession.SessionId = 1
 	}
 
 	tokens, err := h.services.Authorization.GenerateTokens(user, newSession)
@@ -73,8 +74,23 @@ func (h *Handler) SignIn(ctx *gin.Context) {
 	}
 
 	newSession.RefreshToken = tokens[1]
+	appId, err := strconv.Atoi(ctx.GetHeader("app_id"))
+	if err != nil {
+		appId = 1
+	}
+	osName := ctx.GetHeader("os_name")
+	if len(osName) == 0 {
+		osName = "unknown"
+	}
+	newSessionHistoryItem := models.SessionHistoryItem{
+		IpAddress: strings.Split(ctx.Request.RemoteAddr, ":")[0],
+		OS:        osName,
+		City:      "unknown",
+		AppId:     uint(appId),
+		Time:      uint64(time.Now().Unix()),
+	}
 
-	_, err = h.services.AddSession(newSession)
+	_, err = h.services.AddSession(newSession, newSessionHistoryItem)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"package":  "handler",
@@ -90,6 +106,41 @@ func (h *Handler) SignIn(ctx *gin.Context) {
 		"access_token":  tokens[0],
 		"refresh_token": tokens[1],
 	})
+}
+
+func (h *Handler) GetSessionsDetails(ctx *gin.Context) {
+	header := ctx.GetHeader(authorizationHeader)
+	if header == "" {
+		newErrorResponse(ctx, http.StatusUnauthorized, "auth header is empty")
+		return
+	}
+
+	headerParts := strings.Split(header, " ")
+	if len(headerParts) != 2 {
+		newErrorResponse(ctx, http.StatusUnauthorized, "invalid auth header")
+		return
+	}
+
+	claims, err := h.services.Authorization.ParseAccessToken(headerParts[1])
+	if err != nil {
+		newErrorResponse(ctx, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	id := claims.UserId
+	sessions, err := h.services.GetSessionsDetails(id)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"package":  "handler",
+			"file":     "auth.go",
+			"function": "GetSessionsDetails",
+			"message":  err,
+		}).Errorf("error when getting sessions")
+		newErrorResponse(ctx, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	ctx.JSON(http.StatusOK, sessions)
 }
 
 func (h *Handler) Logout(ctx *gin.Context) {

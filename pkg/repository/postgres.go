@@ -6,10 +6,12 @@ import (
 )
 
 const (
-	usersTable           = "users"
-	settingsTable        = "settings"
-	sessionsTable        = "sessions"
-	sessionsHistoryTable = "sessions_history"
+	usersTable            = "users"
+	settingsTable         = "settings"
+	sessionsTable         = "sessions"
+	sessionsHistoryTable  = "sessions_history"
+	applicationsTable     = "applications"
+	applicationTypesTable = "application_types"
 )
 
 type Config struct {

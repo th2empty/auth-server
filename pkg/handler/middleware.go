@@ -32,8 +32,6 @@ func (h *Handler) userIdentity(ctx *gin.Context) {
 		return
 	}
 
-	logrus.Infof("session id %d", claims.SessionId)
-
 	if _, err := h.services.GetSessionById(claims.SessionId); err != nil {
 		logrus.WithFields(logrus.Fields{
 			"package":  "handler",

@@ -65,12 +65,16 @@ func (s *AuthService) GetSessions(ownerId uint) ([]models.Session, error) {
 	return s.repo.GetSessions(ownerId)
 }
 
+func (s *AuthService) GetSessionsDetails(userId uint) ([]models.SessionItem, error) {
+	return s.repo.GetSessionsDetails(userId)
+}
+
 func (s *AuthService) GetSessionById(id uint) (models.Session, error) {
 	return s.repo.GetSessionById(id)
 }
 
-func (s *AuthService) AddSession(session models.Session) (uint, error) {
-	return s.repo.AddSession(session)
+func (s *AuthService) AddSession(session models.Session, historyItem models.SessionHistoryItem) (uint, error) {
+	return s.repo.AddSession(session, historyItem)
 }
 
 func (s *AuthService) UpdateSession(session models.Session) error {

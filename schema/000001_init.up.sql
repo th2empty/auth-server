@@ -40,28 +40,28 @@ CREATE TABLE sessions
     issused_at int
 );
 
-CREATE TABLE sessions_history
+CREATE TABLE application_types
 (
-    id int references sessions(id) on delete cascade not null,
-    app_id int not null,
-    ip_address text,
-    city text,
-    os text,
-    time int not null
+    id serial not null unique,
+    type text not null
 );
 
 CREATE TABLE applications
 (
     id serial not null unique,
     name VARCHAR(48) not null,
-    type_id int not null,
+    type_id int references application_types(id) on delete cascade not null,
     os text not null
 );
 
-CREATE TABLE application_types
+CREATE TABLE sessions_history
 (
-    id serial not null unique,
-    type text not null
+    id serial references sessions(id) on delete cascade not null,
+    app_id int references applications(id) on delete cascade not null,
+    ip_address text,
+    city text,
+    os text,
+    time int not null
 );
 
 CREATE TABLE settings
@@ -77,6 +77,12 @@ CREATE TABLE settings
 insert into roles(name, permission_id) values('user', 0);
 
 insert into avatars(name, path) values ('NO AVATAR', '/');
+
+insert into application_types(type) values ('unknown');
+insert into application_types(type) values ('official');
+
+insert into applications(name, type_id, os) values ('unknown', 1, 'unknown');
+insert into applications(name, type_id, os) values ('PasswordCloud', 2, 'Android');
 
 insert into permissions(
     can_read, can_write, can_access_private_data, can_manage_accounts
